@@ -1,0 +1,41 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: etudiant-db
+    environment:
+      POSTGRES_DB: etudiantdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - etudiant-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./api-spring-boot/etudiant-api
+    container_name: etudiant-api
+    ports:
+      - "8081:8080"  # Changez ici : utilisez 8081 au lieu de 8080
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/etudiantdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    networks:
+      - etudiant-network
+
+networks:
+  etudiant-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
