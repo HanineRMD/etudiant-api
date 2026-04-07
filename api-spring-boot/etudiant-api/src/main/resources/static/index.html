@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liste des Étudiants</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+<h1>Liste des Étudiants</h1>
+<table id="etudiantsTable">
+    <thead>
+    <tr><th>ID</th><th>CIN</th><th>Nom</th><th>Date Naissance</th><th>Âge</th></tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    fetch('/api/etudiants')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#etudiantsTable tbody');
+            data.forEach(etudiant => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = etudiant.id;
+                row.insertCell(1).textContent = etudiant.cin;
+                row.insertCell(2).textContent = etudiant.nom;
+                row.insertCell(3).textContent = etudiant.dateNaissance;
+                // Calculer l'âge
+                const age = new Date().getFullYear() - new Date(etudiant.dateNaissance).getFullYear();
+                row.insertCell(4).textContent = age;
+            });
+        })
+        .catch(error => console.error('Erreur:', error));
+</script>
+</body>
+</html>

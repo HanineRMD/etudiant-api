@@ -1,12 +1,12 @@
-# Étape 1: Construction de l'application
+# Dockerfile.simple
 FROM maven:3.9.5-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
-RUN mvn dependency:go-offline
+# Ajouter cette ligne pour ignorer les erreurs DNS
+RUN mvn dependency:go-offline -B || true
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -B
 
-# Étape 2: Création de l'image finale
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
