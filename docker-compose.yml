@@ -26,10 +26,20 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/etudiantdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+    networks:
+      - etudiant-network
+
+  redis:   # ✅ déplacé ici
+    image: redis:7-alpine
+    container_name: etudiant-redis
+    ports:
+      - "6379:6379"
     networks:
       - etudiant-network
 
@@ -39,10 +49,3 @@ networks:
 
 volumes:
   postgres_data:
-redis:
-  image: redis:7-alpine
-  container_name: etudiant-redis
-  ports:
-    - "6379:6379"
-  networks:
-    - etudiant-network

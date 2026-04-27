@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/etudiant.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.98.129.39:8081/api/etudiants';
+  static const String baseUrl = 'http://10.228.228.39:8081/api/etudiants';
   Future<List<Etudiant>> getEtudiants() async {
     try {
       print('Connexion à: $baseUrl');

@@ -1,9 +1,7 @@
 package com.example.etudiant_api.steps;
 
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
-import io.cucumber.java.en.Then;
 import com.example.etudiant_api.entity.Etudiant;
+import io.cucumber.java.en.*;
 import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -12,18 +10,18 @@ public class EtudiantSteps {
     private int age;
 
     @Given("un étudiant avec la date de naissance {string}")
-    public void un_etudiant_avec_la_date_de_naissance(String dateNaissance) {
+    public void unEtudiantAvecDateNaissance(String date) {
         etudiant = new Etudiant();
-        etudiant.setDateNaissance(LocalDate.parse(dateNaissance));
+        etudiant.setDateNaissance(LocalDate.parse(date));
     }
 
     @When("on calcule son âge")
-    public void on_calcule_son_age() {
+    public void onCalculeSonAge() {
         age = etudiant.age();
     }
 
     @Then("l'âge retourné doit être {int}")
-    public void l_age_retourne_doit_etre(Integer ageAttendu) {
-        assertEquals(ageAttendu, age);
+    public void lAgeRetourneDoit(int expected) {
+        assertEquals(expected, age);
     }
 }

@@ -1,19 +1,26 @@
 package com.example.etudiant_api.service;
 
 import com.example.etudiant_api.dto.EtudiantDTO;
+import com.example.etudiant_api.entity.Departement;
 import com.example.etudiant_api.entity.Etudiant;
 import com.example.etudiant_api.mapper.EtudiantMapper;
+import com.example.etudiant_api.repository.DepartementRepository;
 import com.example.etudiant_api.repository.EtudiantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 
+@Cacheable(value = "etudiants")          // sur findAll()
+@CacheEvict(value = "etudiants", allEntries = true)  // sur save(), update(), delete()
 @Service
 @RequiredArgsConstructor
 public class EtudiantService {
     private final EtudiantRepository etudiantRepository;
     private final EtudiantMapper etudiantMapper;
+    private final DepartementRepository departementRepository;
 
     public List<EtudiantDTO> findAll() {
         return etudiantRepository.findAll().stream()
@@ -29,6 +36,11 @@ public class EtudiantService {
 
     public EtudiantDTO save(EtudiantDTO dto) {
         Etudiant etudiant = etudiantMapper.toEntity(dto);
+        if (dto.getDepartementId() != null) {
+            Departement dept = departementRepository.findById(dto.getDepartementId())
+                    .orElseThrow(() -> new RuntimeException("Département non trouvé"));
+            etudiant.setDepartement(dept);
+        }
         return etudiantMapper.toDto(etudiantRepository.save(etudiant));
     }
 
@@ -40,6 +52,11 @@ public class EtudiantService {
         existing.setDateNaissance(dto.getDateNaissance());
         existing.setEmail(dto.getEmail());
         existing.setAnneePremiereInscription(dto.getAnneePremiereInscription());
+        if (dto.getDepartementId() != null) {
+            Departement dept = departementRepository.findById(dto.getDepartementId())
+                    .orElseThrow(() -> new RuntimeException("Département non trouvé"));
+            existing.setDepartement(dept);
+        }
         return etudiantMapper.toDto(etudiantRepository.save(existing));
     }
 
