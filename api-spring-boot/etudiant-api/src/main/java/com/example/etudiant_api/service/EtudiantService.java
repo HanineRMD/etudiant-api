@@ -1,0 +1,72 @@
+package com.example.etudiant_api.service;
+
+import com.example.etudiant_api.dto.EtudiantDTO;
+import com.example.etudiant_api.entity.Departement;
+import com.example.etudiant_api.entity.Etudiant;
+import com.example.etudiant_api.mapper.EtudiantMapper;
+import com.example.etudiant_api.repository.DepartementRepository;
+import com.example.etudiant_api.repository.EtudiantRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+
+@Cacheable(value = "etudiants")          // sur findAll()
+@CacheEvict(value = "etudiants", allEntries = true)  // sur save(), update(), delete()
+@Service
+@RequiredArgsConstructor
+public class EtudiantService {
+    private final EtudiantRepository etudiantRepository;
+    private final EtudiantMapper etudiantMapper;
+    private final DepartementRepository departementRepository;
+
+    public List<EtudiantDTO> findAll() {
+        return etudiantRepository.findAll().stream()
+                .map(etudiantMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public EtudiantDTO findById(Long id) {
+        Etudiant etudiant = etudiantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Étudiant non trouvé"));
+        return etudiantMapper.toDto(etudiant);
+    }
+
+    public EtudiantDTO save(EtudiantDTO dto) {
+        Etudiant etudiant = etudiantMapper.toEntity(dto);
+        if (dto.getDepartementId() != null) {
+            Departement dept = departementRepository.findById(dto.getDepartementId())
+                    .orElseThrow(() -> new RuntimeException("Département non trouvé"));
+            etudiant.setDepartement(dept);
+        }
+        return etudiantMapper.toDto(etudiantRepository.save(etudiant));
+    }
+
+    public EtudiantDTO update(Long id, EtudiantDTO dto) {
+        Etudiant existing = etudiantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Étudiant non trouvé"));
+        existing.setCin(dto.getCin());
+        existing.setNom(dto.getNom());
+        existing.setDateNaissance(dto.getDateNaissance());
+        existing.setEmail(dto.getEmail());
+        existing.setAnneePremiereInscription(dto.getAnneePremiereInscription());
+        if (dto.getDepartementId() != null) {
+            Departement dept = departementRepository.findById(dto.getDepartementId())
+                    .orElseThrow(() -> new RuntimeException("Département non trouvé"));
+            existing.setDepartement(dept);
+        }
+        return etudiantMapper.toDto(etudiantRepository.save(existing));
+    }
+
+    public void delete(Long id) {
+        etudiantRepository.deleteById(id);
+    }
+
+    public List<EtudiantDTO> findByAnnee(int annee) {
+        return etudiantRepository.findByAnneePremiereInscription(annee).stream()
+                .map(etudiantMapper::toDto)
+                .collect(Collectors.toList());
+    }
+}

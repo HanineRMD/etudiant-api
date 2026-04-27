@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Étudiants</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f0f2f5; }
+        h1 { color: #2c3e50; }
+        table { border-collapse: collapse; width: 100%; background: white;
+            border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        th { background: #3498db; color: white; padding: 12px; }
+        td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+<h1>Liste des Étudiants</h1>
+<table>
+    <thead>
+    <tr>
+        <th>CIN</th>
+        <th>Nom</th>
+        <th>Date de naissance</th>
+        <th>Email</th>
+        <th>Département</th>
+    </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+</table>
+
+<script>
+    fetch('/api/etudiants')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById('tbody');
+            data.forEach(e => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                        <td>${e.cin}</td>
+                        <td>${e.nom}</td>
+                        <td>${e.dateNaissance}</td>
+                        <td>${e.email || '-'}</td>
+                        <td>${e.departementNom || '-'}</td>
+                    `;
+                tbody.appendChild(tr);
+            });
+        });
+</script>
+</body>
+</html>

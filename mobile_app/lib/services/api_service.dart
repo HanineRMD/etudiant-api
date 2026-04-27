@@ -3,21 +3,23 @@ import 'package:http/http.dart' as http;
 import '../models/etudiant.dart';
 
 class ApiService {
-  // Pour l'émulateur Android, utilisez 10.0.2.2
-  // Pour un vrai appareil, utilisez l'IP de votre machine
-  static const String baseUrl = 'http://10.0.2.2:8080/api/etudiants';
-
+  static const String baseUrl = 'http://10.228.228.39:8081/api/etudiants';
   Future<List<Etudiant>> getEtudiants() async {
     try {
+      print('Connexion à: $baseUrl');
       final response = await http.get(Uri.parse(baseUrl));
+
+      print('Status code: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         List jsonResponse = json.decode(response.body);
+        print('Nombre d\'étudiants: ${jsonResponse.length}');
         return jsonResponse.map((data) => Etudiant.fromJson(data)).toList();
       } else {
-        throw Exception('Échec du chargement des étudiants');
+        throw Exception('Échec du chargement: ${response.statusCode}');
       }
     } catch (e) {
+      print('Erreur: $e');
       throw Exception('Erreur de connexion: $e');
     }
   }
