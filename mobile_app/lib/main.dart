@@ -1,108 +1,125 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'models/etudiant.dart';
-import 'services/api_service.dart';
+import 'package:http/http.dart' as http;
 
-void main() {
-  runApp(const MyApp());
-}
+const String baseUrl = 'http://10.0.2.2:8080';
+
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Liste des Étudiants',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: const StudentListPage(),
-    );
-  }
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Etudiants',
+    theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+    home: const DepartementScreen(),
+  );
 }
 
-class StudentListPage extends StatefulWidget {
-  const StudentListPage({super.key});
-
+class DepartementScreen extends StatefulWidget {
+  const DepartementScreen({super.key});
   @override
-  State<StudentListPage> createState() => _StudentListPageState();
+  State<DepartementScreen> createState() => _DepartementScreenState();
 }
 
-class _StudentListPageState extends State<StudentListPage> {
-  late Future<List<Etudiant>> futureEtudiants;
+class _DepartementScreenState extends State<DepartementScreen> {
+  List departements = [];
+  List etudiants = [];
+  Map? selectedDept;
+  bool loading = true;
 
   @override
   void initState() {
     super.initState();
-    futureEtudiants = ApiService().getEtudiants();
+    _loadDepartements();
+  }
+
+  Future<void> _loadDepartements() async {
+    final res = await http.get(Uri.parse('$baseUrl/api/departements'));
+    if (res.statusCode == 200) {
+      setState(() {
+        departements = json.decode(res.body);
+        loading = false;
+      });
+    }
+  }
+
+  Future<void> _loadEtudiants(int deptId) async {
+    setState(() => loading = true);
+    final res = await http.get(Uri.parse('$baseUrl/api/etudiants'));
+    if (res.statusCode == 200) {
+      final all = json.decode(res.body) as List;
+      setState(() {
+        etudiants = all.where((e) => e['departementId'] == deptId).toList();
+        loading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Liste des Étudiants'),
+        title: const Text('Etudiants par Departement'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
-      body: Center(
-        child: FutureBuilder<List<Etudiant>>(
-          future: futureEtudiants,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error, size: 50, color: Colors.red),
-                  const SizedBox(height: 10),
-                  Text('Erreur: ${snapshot.error}'),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        futureEtudiants = ApiService().getEtudiants();
-                      });
-                    },
-                    child: const Text('Réessayer'),
-                  ),
-                ],
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Text('Aucun étudiant trouvé');
-            }
-
-            return ListView.builder(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                final etudiant = snapshot.data![index];
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: DropdownButtonFormField(
+              decoration: const InputDecoration(
+                labelText: 'Choisir un departement',
+                border: OutlineInputBorder(),
+              ),
+              items: departements.map((d) {
+                return DropdownMenuItem(
+                    value: d, child: Text(d['nom']));
+              }).toList(),
+              onChanged: (val) {
+                setState(() => selectedDept = val as Map);
+                _loadEtudiants((val as Map)['id']);
+              },
+            ),
+          ),
+          Expanded(
+            child: etudiants.isEmpty
+                ? const Center(child: Text('Selectionnez un departement'))
+                : ListView.builder(
+              itemCount: etudiants.length,
+              itemBuilder: (ctx, i) {
+                final e = etudiants[i];
                 return Card(
-                  margin: const EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 4),
                   child: ListTile(
                     leading: CircleAvatar(
-                      child: Text(etudiant.nom[0].toUpperCase()),
+                      backgroundColor: Colors.blue,
+                      child: Text(
+                        e['nom'][0].toUpperCase(),
+                        style: const TextStyle(color: Colors.white),
+                      ),
                     ),
-                    title: Text(
-                      etudiant.nom,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    title: Text(e['nom'],
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('CIN: ${etudiant.cin}'),
-                        Text(
-                          'Date de naissance: ${etudiant.dateNaissance.day}/${etudiant.dateNaissance.month}/${etudiant.dateNaissance.year}',
-                        ),
+                        Text('CIN: ${e['cin']}'),
+                        Text('Naissance: ${e['dateNaissance']}'),
+                        Text('Email: ${e['email'] ?? '-'}'),
                       ],
                     ),
                   ),
                 );
               },
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
