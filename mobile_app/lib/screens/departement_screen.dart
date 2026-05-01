@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
-const String baseUrl = 'http://10.0.2.2:8888';
+import '../config/app_config.dart';
 
 void main() => runApp(const MyApp());
 
@@ -35,24 +34,34 @@ class _DepartementScreenState extends State<DepartementScreen> {
   }
 
   Future<void> _loadDepartements() async {
-    final res = await http.get(Uri.parse('$baseUrl/api/departements'));
-    if (res.statusCode == 200) {
-      setState(() {
-        departements = json.decode(res.body);
-        loading = false;
-      });
+    try {
+      final res = await http.get(Uri.parse('${AppConfig.apiBaseUrl}/departements'));
+      if (res.statusCode == 200) {
+        setState(() {
+          departements = json.decode(res.body);
+          loading = false;
+        });
+      }
+    } catch (e) {
+      print('Erreur: $e');
+      setState(() => loading = false);
     }
   }
 
   Future<void> _loadEtudiants(int deptId) async {
     setState(() => loading = true);
-    final res = await http.get(Uri.parse('$baseUrl/api/etudiants'));
-    if (res.statusCode == 200) {
-      final all = json.decode(res.body) as List;
-      setState(() {
-        etudiants = all.where((e) => e['departementId'] == deptId).toList();
-        loading = false;
-      });
+    try {
+      final res = await http.get(Uri.parse(AppConfig.etudiants));
+      if (res.statusCode == 200) {
+        final all = json.decode(res.body) as List;
+        setState(() {
+          etudiants = all.where((e) => e['departementId'] == deptId).toList();
+          loading = false;
+        });
+      }
+    } catch (e) {
+      print('Erreur: $e');
+      setState(() => loading = false);
     }
   }
 

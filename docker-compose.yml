@@ -25,6 +25,11 @@ services:
       - "6379:6379"
     networks:
       - etudiant-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   eureka-server:
     build: ./eureka-server
@@ -49,7 +54,7 @@ services:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
       eureka-server:
         condition: service_healthy
     environment:
@@ -59,7 +64,7 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_APPLICATION_NAME: etudiant-service
+      SPRING_APPLICATION_NAME: ETUDIANT-SERVICE
       SERVER_PORT: 8080
     networks:
       - etudiant-network
@@ -79,7 +84,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_APPLICATION_NAME: grading-service
+      SPRING_APPLICATION_NAME: GRADING-SERVICE
       SERVER_PORT: 8082
     networks:
       - etudiant-network
@@ -88,13 +93,14 @@ services:
     build: ./api-gateway
     container_name: api-gateway
     ports:
-      - "8888:8080"  # ← CHANGÉ : 8888 au lieu de 8081
+      - "8888:8888"
     depends_on:
       eureka-server:
         condition: service_healthy
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_APPLICATION_NAME: api-gateway
+      SPRING_APPLICATION_NAME: API-GATEWAY
+      SERVER_PORT: 8888
     networks:
       - etudiant-network
 
@@ -105,6 +111,8 @@ services:
       - "3000:3000"
     depends_on:
       - api-gateway
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8888/api
     networks:
       - etudiant-network
 

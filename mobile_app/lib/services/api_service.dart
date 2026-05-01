@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/etudiant.dart';
+import '../config/app_config.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8081/api/etudiants';
   Future<List<Etudiant>> getEtudiants() async {
     try {
-      print('Connexion à: $baseUrl');
-      final response = await http.get(Uri.parse(baseUrl));
+      print('Connexion à: ${AppConfig.etudiants}');
+      final response = await http.get(Uri.parse(AppConfig.etudiants));
 
       print('Status code: ${response.statusCode}');
 
@@ -21,6 +21,20 @@ class ApiService {
     } catch (e) {
       print('Erreur: $e');
       throw Exception('Erreur de connexion: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getDepartements() async {
+    try {
+      final response = await http.get(Uri.parse(AppConfig.departements));
+      if (response.statusCode == 200) {
+        return List<Map<String, dynamic>>.from(json.decode(response.body));
+      } else {
+        throw Exception('Échec du chargement des départements');
+      }
+    } catch (e) {
+      print('Erreur départements: $e');
+      throw Exception('Erreur de connexion pour départements');
     }
   }
 }
