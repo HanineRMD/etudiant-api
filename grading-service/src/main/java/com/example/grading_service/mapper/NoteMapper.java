@@ -1,27 +1,29 @@
-package com.example.grading_service.mapper;
+package com.example.grading_service.mapper;  // ✅ Correct
 
-import com.example.grading.dto.NoteDTO;
-import com.example.grading.entity.Note;
+import com.example.grading_service.dto.NoteDTO;  // ← Changement: grading → grading_service
+import com.example.grading_service.entity.Note;  // ← Changement: grading → grading_service
 import org.springframework.stereotype.Component;
 
 @Component
 public class NoteMapper {
 
-    public NoteDTO toDto(Note n) {
+    public NoteDTO toDto(Note note) {
+        if (note == null) return null;
         NoteDTO dto = new NoteDTO();
-        dto.setId(n.getId());
-        dto.setStudentId(n.getStudentId());
-        dto.setMatiere(n.getMatiere());
-        dto.setValeur(n.getValeur());
+        dto.setId(note.getId());
+        dto.setStudentId(note.getStudentId());
+        dto.setMatiere(note.getMatiere());
+        dto.setValeur(note.getValeur());
         return dto;
     }
 
     public Note toEntity(NoteDTO dto) {
-        Note n = new Note();
-        n.setId(dto.getId());
-        n.setStudentId(dto.getStudentId());
-        n.setMatiere(dto.getMatiere());
-        n.setValeur(dto.getValeur());
-        return n;
+        if (dto == null) return null;
+        Note note = new Note();
+        note.setId(dto.getId());
+        note.setStudentId(dto.getStudentId());
+        note.setMatiere(dto.getMatiere());
+        note.setValeur(dto.getValeur());
+        return note;
     }
 }
