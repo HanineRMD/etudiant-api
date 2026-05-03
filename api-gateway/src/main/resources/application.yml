@@ -3,23 +3,20 @@ server:
 
 spring:
   application:
-    name: api-gateway
-
+    name: API-GATEWAY
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
-          lower-case-service-id: true
-
+          lower-case-service-id: true  # ← Garde true
       routes:
         - id: etudiant-service
-          uri: lb://etudiant-service
+          uri: lb://etudiant-service  # ← Change en minuscules
           predicates:
             - Path=/api/etudiants/**,/api/departements/**
-
         - id: grading-service
-          uri: lb://grading-service
+          uri: lb://grading-service  # ← Change en minuscules
           predicates:
             - Path=/api/notes/**
 
@@ -27,21 +24,22 @@ eureka:
   client:
     service-url:
       defaultZone: http://eureka-server:8761/eureka
-
+    fetch-registry: true
+    register-with-eureka: true
   instance:
     prefer-ip-address: true
-    health-check-url-path: /actuator/health
+    hostname: api-gateway
 
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
-
   endpoint:
     health:
       show-details: always

@@ -1,40 +1,58 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/etudiant.dart';
+import '../models/departement.dart';
 import '../config/app_config.dart';
 
 class ApiService {
-  Future<List<Etudiant>> getEtudiants() async {
-    try {
-      print('Connexion à: ${AppConfig.etudiants}');
-      final response = await http.get(Uri.parse(AppConfig.etudiants));
+  static const Duration timeout = Duration(seconds: 15);
 
-      print('Status code: ${response.statusCode}');
+  Future<List<Departement>> getDepartements() async {
+    try {
+      print('Connexion departements: ${AppConfig.departements}');
+      final response = await http
+          .get(Uri.parse(AppConfig.departements))
+          .timeout(timeout, onTimeout: () {
+        throw Exception('Timeout de connexion - verifie que Docker tourne');
+      });
+
+      print('Status: ${response.statusCode}');
 
       if (response.statusCode == 200) {
-        List jsonResponse = json.decode(response.body);
-        print('Nombre d\'étudiants: ${jsonResponse.length}');
-        return jsonResponse.map((data) => Etudiant.fromJson(data)).toList();
+        final List data = json.decode(response.body);
+        return data.map((d) => Departement.fromJson(d)).toList();
       } else {
-        throw Exception('Échec du chargement: ${response.statusCode}');
+        throw Exception('Erreur ${response.statusCode}');
       }
     } catch (e) {
-      print('Erreur: $e');
-      throw Exception('Erreur de connexion: $e');
+      print('Erreur getDepartements: $e');
+      rethrow;
     }
   }
 
-  Future<List<Map<String, dynamic>>> getDepartements() async {
+  Future<List<Etudiant>> getEtudiants() async {
     try {
-      final response = await http.get(Uri.parse(AppConfig.departements));
+      print('Connexion etudiants: ${AppConfig.etudiants}');
+      final response = await http
+          .get(Uri.parse(AppConfig.etudiants))
+          .timeout(timeout, onTimeout: () {
+        throw Exception('Timeout de connexion');
+      });
+
       if (response.statusCode == 200) {
-        return List<Map<String, dynamic>>.from(json.decode(response.body));
+        final List data = json.decode(response.body);
+        return data.map((e) => Etudiant.fromJson(e)).toList();
       } else {
-        throw Exception('Échec du chargement des départements');
+        throw Exception('Erreur ${response.statusCode}');
       }
     } catch (e) {
-      print('Erreur départements: $e');
-      throw Exception('Erreur de connexion pour départements');
+      print('Erreur getEtudiants: $e');
+      rethrow;
     }
+  }
+
+  Future<List<Etudiant>> getEtudiantsByDepartement(int deptId) async {
+    final List<Etudiant> tous = await getEtudiants();
+    return tous.where((e) => e.departementId == deptId).toList();
   }
 }
