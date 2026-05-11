@@ -3,7 +3,7 @@ class AppConfig {
   // ✅ Vrai appareil → IP de ton PC (ipconfig → Wi-Fi)
   // Ton IP WiFi actuelle est : 10.196.23.39
 
-  static const String baseUrl = 'http://10.196.23.39:8081';
+  static const String baseUrl = 'http://10.149.143.39:8081';
   // Si tu utilises la Gateway sur port 8888 :
   // static const String baseUrl = 'http://10.196.23.39:8888';
 

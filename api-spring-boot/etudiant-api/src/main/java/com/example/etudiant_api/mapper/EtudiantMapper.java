@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 public class EtudiantMapper {
 
     public EtudiantDTO toDto(Etudiant etudiant) {
+        if (etudiant == null) {
+            return null;
+        }
         EtudiantDTO dto = new EtudiantDTO();
         dto.setId(etudiant.getId());
         dto.setCin(etudiant.getCin());
@@ -24,6 +27,9 @@ public class EtudiantMapper {
     }
 
     public Etudiant toEntity(EtudiantDTO dto) {
+        if (dto == null) {
+            return null;
+        }
         Etudiant etudiant = new Etudiant();
         etudiant.setId(dto.getId());
         etudiant.setCin(dto.getCin());

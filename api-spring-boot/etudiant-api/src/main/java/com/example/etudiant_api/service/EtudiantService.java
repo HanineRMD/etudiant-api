@@ -3,6 +3,7 @@ package com.example.etudiant_api.service;
 import com.example.etudiant_api.dto.EtudiantDTO;
 import com.example.etudiant_api.entity.Departement;
 import com.example.etudiant_api.entity.Etudiant;
+import com.example.etudiant_api.kafka.KafkaProducerService;
 import com.example.etudiant_api.mapper.EtudiantMapper;
 import com.example.etudiant_api.repository.DepartementRepository;
 import com.example.etudiant_api.repository.EtudiantRepository;
@@ -21,7 +22,7 @@ public class EtudiantService {
     private final EtudiantRepository etudiantRepository;
     private final EtudiantMapper etudiantMapper;
     private final DepartementRepository departementRepository;
-
+    private final KafkaProducerService kafkaProducerService;
     public List<EtudiantDTO> findAll() {
         return etudiantRepository.findAll().stream()
                 .map(etudiantMapper::toDto)
@@ -41,8 +42,9 @@ public class EtudiantService {
                     .orElseThrow(() -> new RuntimeException("Département non trouvé"));
             etudiant.setDepartement(dept);
         }
-        return etudiantMapper.toDto(etudiantRepository.save(etudiant));
-    }
+        EtudiantDTO saved = etudiantMapper.toDto(etudiantRepository.save(etudiant));
+        kafkaProducerService.publishEtudiantCreated(saved); // AJOUTER
+        return saved;    }
 
     public EtudiantDTO update(Long id, EtudiantDTO dto) {
         Etudiant existing = etudiantRepository.findById(id)

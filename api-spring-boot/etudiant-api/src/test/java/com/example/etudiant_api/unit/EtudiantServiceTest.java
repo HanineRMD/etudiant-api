@@ -131,4 +131,27 @@ class EtudiantServiceTest {
 
         assertThat(e.age()).isEqualTo(23);
     }
+    @Test
+    void shouldUpdateEtudiant() {
+        Etudiant existing = buildEtudiant();
+        EtudiantDTO dto = buildDTO();
+        dto.setNom("Nouveau Nom");
+
+        when(etudiantRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(etudiantRepository.save(any(Etudiant.class))).thenReturn(existing);
+        when(etudiantMapper.toDto(any(Etudiant.class))).thenReturn(dto);
+
+        EtudiantDTO result = etudiantService.update(1L, dto);
+
+        assertThat(result).isNotNull();
+        verify(etudiantRepository).save(any(Etudiant.class));
+    }
+
+    @Test
+    void shouldThrowWhenUpdatingNonExistingEtudiant() {
+        when(etudiantRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> etudiantService.update(99L, buildDTO()))
+                .isInstanceOf(RuntimeException.class);
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.etudiant_api.integration;
 
+import com.example.etudiant_api.EtudiantApiApplication;
 import com.example.etudiant_api.entity.Departement;
 import com.example.etudiant_api.entity.Etudiant;
 import com.example.etudiant_api.repository.DepartementRepository;
@@ -22,16 +23,18 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        classes = EtudiantApiApplication.class
+)
 @Testcontainers
 class EtudiantIntegrationTest {
 
     @Container
-    static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>("postgres:15")
-                    .withDatabaseName("testdb")
-                    .withUsername("test")
-                    .withPassword("test");
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -41,6 +44,9 @@ class EtudiantIntegrationTest {
         registry.add("spring.cache.type", () -> "simple");
         registry.add("eureka.client.enabled", () -> "false");
         registry.add("spring.cloud.discovery.enabled", () -> "false");
+        registry.add("spring.classformat.ignore", () -> "true");
+        registry.add("spring.autoconfigure.exclude",
+                () -> "org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration");
     }
 
     @Autowired

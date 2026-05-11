@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 public class DepartementMapper {
 
     public DepartementDTO toDto(Departement d) {
+        if (d == null) {
+            return null;
+        }
         DepartementDTO dto = new DepartementDTO();
         dto.setId(d.getId());
         dto.setNom(d.getNom());
@@ -15,6 +18,9 @@ public class DepartementMapper {
     }
 
     public Departement toEntity(DepartementDTO dto) {
+        if (dto == null) {
+            return null;
+        }
         Departement d = new Departement();
         d.setId(dto.getId());
         d.setNom(dto.getNom());
