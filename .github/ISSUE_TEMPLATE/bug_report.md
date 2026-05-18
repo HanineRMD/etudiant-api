@@ -1,21 +1,27 @@
 ---
-name: Bug Report
+name: Bug report
 about: Signaler un bug
+title: '[BUG] '
+labels: bug
 ---
 
 ## Description du bug
-<!-- Description claire du problème -->
-
-## Étapes pour reproduire
-1.
-2.
-3.
-
-## Comportement attendu
-<!-- Ce qui devrait se passer -->
-
-## Comportement actuel
-<!-- Ce qui se passe réellement -->
+Description claire du problème.
 
 ## Ticket Jira
-<!-- Lien vers le ticket : PROJ-XX -->
+Lien: PROJ-XX
+
+## Etapes pour reproduire
+1. Aller sur '...'
+2. Cliquer sur '...'
+
+## Comportement attendu
+Ce qui devrait se passer.
+
+## Captures d'ecran
+Si applicable.
+
+## Environnement
+- OS: [ex: Windows 11]
+- Docker: [ex: 24.0]
+- Branch: [ex: version-5]
